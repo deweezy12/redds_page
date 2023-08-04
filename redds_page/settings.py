@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     #My apps
     "redds_pages",
+    "user",
 
     #Default Django apps
     "django.contrib.admin",
