@@ -1,39 +1,83 @@
-﻿# theredds.eu (GitHub Pages)
+# The Redds (React + TypeScript)
 
-This repo now contains a plain static website for GitHub Pages.
+Minimal static blog homepage inspired by a clean, centered editorial layout.
 
-## Files
-- `index.html`: main website page
-- `CNAME`: custom domain (`theredds.eu`)
-- `.nojekyll`: serves files as-is (no Jekyll processing)
+## Stack
+- Vite
+- React
+- TypeScript
+- React Router (`HashRouter`) for GitHub Pages-safe routing
 
-## Publish steps (GitHub)
-1. Push this repo to GitHub.
+## Folder Structure
+```text
+.
+|-- .github/
+|   `-- workflows/
+|       `-- deploy.yml
+|-- public/
+|   |-- .nojekyll
+|   `-- CNAME
+|-- src/
+|   |-- components/
+|   |   `-- SiteHeader.tsx
+|   |-- data/
+|   |   `-- posts.ts
+|   |-- pages/
+|   |   |-- ArchivesPage.tsx
+|   |   |-- HomePage.tsx
+|   |   |-- NotFoundPage.tsx
+|   |   `-- PostPage.tsx
+|   |-- App.tsx
+|   |-- main.tsx
+|   |-- styles.css
+|   `-- types.ts
+|-- .gitignore
+|-- index.html
+|-- package.json
+|-- tsconfig.json
+|-- tsconfig.node.json
+`-- vite.config.ts
+```
+
+## Install
+```bash
+npm install
+```
+
+## Run Locally
+```bash
+npm run dev
+```
+
+## Build
+```bash
+npm run build
+```
+
+## Deploy to GitHub Pages
+1. Push the repo to GitHub.
 2. Open `Settings -> Pages`.
-3. Under `Build and deployment`, set:
-   - `Source`: `Deploy from a branch`
-   - `Branch`: `main` and folder `/ (root)`
-4. Confirm `Custom domain` is `theredds.eu`.
-5. Enable `Enforce HTTPS` after DNS is resolving.
+3. Set `Source` to `GitHub Actions`.
+4. Push to `main`.
+5. Workflow file `.github/workflows/deploy.yml` builds and deploys automatically.
 
-## DNS on NETIM
-Set these records for `theredds.eu`:
-- `A` -> `185.199.108.153`
-- `A` -> `185.199.109.153`
-- `A` -> `185.199.110.153`
-- `A` -> `185.199.111.153`
-- `AAAA` -> `2606:50c0:8000::153`
-- `AAAA` -> `2606:50c0:8001::153`
-- `AAAA` -> `2606:50c0:8002::153`
-- `AAAA` -> `2606:50c0:8003::153`
+## Base Path (Important)
+For project pages (`https://<user>.github.io/<repo>/`), set repo name in `vite.config.ts`:
 
-Optional for `www`:
-- `CNAME` `www` -> `<your-github-username>.github.io`
+```ts
+const repoName = "the-redds";
+base: `/${repoName}/`;
+```
 
-Avoid wildcard DNS records like `*.theredds.eu`.
+If your repository name changes, update `repoName`.
 
-PowerShell DNS check:
-- `Resolve-DnsName theredds.eu -Type A`
-- `Resolve-DnsName theredds.eu -Type AAAA`
+## Routes
+- Home: `/#/`
+- Post: `/#/posts/:slug`
 
-DNS propagation may take from minutes up to 24-48 hours.
+`HashRouter` avoids 404 refresh issues on GitHub Pages.
+
+## Content
+All post content is local/static in `src/data/posts.ts`.
+
+The first post is `redds-statuten` and includes blog-style text plus a direct link to `Redds Statuten.pdf`.

@@ -1,124 +1,13 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>The Redds</title>
-  <meta name="description" content="Official website of The Redds." />
-  <style>
-    :root {
-      --bg: #f4efe6;
-      --ink: #1f1f1f;
-      --accent: #b6422f;
-      --accent-2: #2d5a40;
-      --card: #fffaf0;
-      --line: #d6cfc2;
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      font-family: Georgia, "Times New Roman", serif;
-      color: var(--ink);
-      background:
-        radial-gradient(circle at 0% 0%, rgba(182,66,47,0.12), transparent 40%),
-        radial-gradient(circle at 100% 100%, rgba(45,90,64,0.12), transparent 45%),
-        var(--bg);
-      min-height: 100vh;
-      display: grid;
-      place-items: center;
-      padding: 24px;
-    }
-
-    .site {
-      width: min(760px, 100%);
-      background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 40px 28px;
-      box-shadow: 0 20px 40px rgba(31,31,31,0.08);
-      animation: fadeUp .6s ease-out both;
-    }
-
-    h1 {
-      margin: 0 0 12px;
-      font-size: clamp(2rem, 5vw, 3.4rem);
-      line-height: 1.05;
-      letter-spacing: 0.02em;
-    }
-
-    .bar {
-      width: 90px;
-      height: 4px;
-      background: linear-gradient(90deg, var(--accent), var(--accent-2));
-      border-radius: 999px;
-      margin: 0 0 20px;
-    }
-
-    p {
-      margin: 0 0 16px;
-      font-size: 1.08rem;
-      line-height: 1.65;
-    }
-
-    .domain {
-      font-weight: 700;
-      color: var(--accent);
-    }
-
-    .links {
-      margin-top: 22px;
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    a.btn {
-      text-decoration: none;
-      border: 1px solid var(--ink);
-      color: var(--ink);
-      padding: 10px 16px;
-      border-radius: 999px;
-      transition: transform .18s ease, background-color .18s ease;
-    }
-
-    a.btn:hover {
-      background: #efe7d8;
-      transform: translateY(-1px);
-    }
-
-    footer {
-      margin-top: 26px;
-      color: #5e5e5e;
-      font-size: .93rem;
-    }
-
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(12px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-  </style>
-</head>
-<body>
-  <main class="site">
-    <h1>The Redds</h1>
-    <div class="bar" aria-hidden="true"></div>
-    <p>Welcome to the official home of The Redds.</p>
-    <p>This site is live at <span class="domain">theredds.eu</span> and hosted with GitHub Pages.</p>
-
-    <div class="links">
-      <a class="btn" href="https://github.com" target="_blank" rel="noreferrer">GitHub</a>
-      <a class="btn" href="mailto:hello@theredds.eu">Contact</a>
-    </div>
-
-    <footer>
-      <span id="year"></span> The Redds
-    </footer>
-  </main>
-
-  <script>
-    document.getElementById("year").textContent = new Date().getFullYear();
-  </script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="The Redds blog." />
+    <title>The Redds</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>

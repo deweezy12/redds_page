@@ -1,0 +1,10 @@
+export type Post = {
+  slug: string;
+  title: string;
+  date: string;
+  description?: string;
+  readTime?: string;
+  resourceLabel?: string;
+  resourceUrl?: string;
+  content: string[];
+};
