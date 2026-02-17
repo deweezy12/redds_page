@@ -62,14 +62,13 @@ npm run build
 5. Workflow file `.github/workflows/deploy.yml` builds and deploys automatically.
 
 ## Base Path (Important)
-For project pages (`https://<user>.github.io/<repo>/`), set repo name in `vite.config.ts`:
+For the custom domain `https://theredds.eu`, keep Vite base as:
 
 ```ts
-const repoName = "the-redds";
-base: `/${repoName}/`;
+base: "/";
 ```
 
-If your repository name changes, update `repoName`.
+Only use a repo base path (for example `/my-repo/`) if you deploy without a custom domain at `https://<user>.github.io/<repo>/`.
 
 ## Routes
 - Home: `/#/`
