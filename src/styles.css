@@ -2,7 +2,6 @@
 
 :root {
   --blue: #2052bb;
-  --blue-2: #2052bb;
   --header-text: #edf3ff;
   --page: #ffffff;
   --text: #222b39;
@@ -40,7 +39,7 @@ a:hover {
 
 .site-header {
   width: 100%;
-  background: linear-gradient(180deg, var(--blue) 0%, var(--blue-2) 100%);
+  background: var(--blue);
   color: var(--header-text);
 }
 
@@ -48,10 +47,6 @@ a:hover {
   max-width: var(--content-width);
   margin: 0 auto;
   padding: 0.9rem 1rem 1rem;
-  min-height: 170px;
-}
-
-.site-header--compact .site-header__inner {
   min-height: 170px;
 }
 
@@ -68,16 +63,17 @@ a:hover {
 .site-header__nav a {
   color: #d9e3f5;
   font-size: 0.95rem;
-  font-weight: 400;
+  font-weight: 300;
   text-decoration: none;
 }
 
 .site-header__nav a.active {
-  color: #b8c5de;
-  font-weight: 400;
+  color: #d9e3f5;
+  font-weight: 300;
 }
 
 .site-header__nav a:hover {
+  font-weight: 700;
   text-decoration: none;
 }
 
@@ -111,8 +107,20 @@ a:hover {
   padding: 2.2rem 1rem 4.5rem;
 }
 
-.main-shell--article {
-  max-width: var(--content-width);
+.main-shell--archives {
+  color: #3e3e3e;
+}
+
+.main-shell--archives a {
+  color: #3e3e3e;
+}
+
+.main-shell--archives .post-row__meta {
+  color: #666;
+}
+
+.main-shell--archives .post-row__description {
+  color: #4b4b4b;
 }
 
 .post-list {
@@ -157,6 +165,7 @@ a:hover {
   font-family: Inter, "IBM Plex Sans", sans-serif;
   font-size: clamp(2.05rem, 5.5vw, 3.15rem);
   line-height: 1.08;
+  color: #3f3f3f;
 }
 
 .article__meta {
@@ -185,10 +194,6 @@ a:hover {
 @media (max-width: 640px) {
   .site-header__inner {
     padding: 0.8rem 0.95rem 0.9rem;
-    min-height: 155px;
-  }
-
-  .site-header--compact .site-header__inner {
     min-height: 155px;
   }
 

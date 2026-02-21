@@ -1,6 +1,6 @@
-﻿import { Link, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { SiteHeader } from "../components/SiteHeader";
-import { postBySlug } from "../data/posts";
+import { getPostMeta, postBySlug } from "../content/posts";
 
 export function PostPage() {
   const { slug } = useParams();
@@ -9,13 +9,13 @@ export function PostPage() {
   if (!post) {
     return (
       <>
-        <SiteHeader compact />
-        <main className="main-shell main-shell--article">
+        <SiteHeader />
+        <main className="main-shell">
           <article className="article">
-            <h2>Post not found</h2>
-            <p>The requested post does not exist.</p>
+            <h2>Beitrag nicht gefunden</h2>
+            <p>Der angefragte Beitrag existiert nicht.</p>
             <p>
-              <Link to="/">Back to home</Link>
+              <Link to="/">Zur Startseite</Link>
             </p>
           </article>
         </main>
@@ -25,26 +25,23 @@ export function PostPage() {
 
   return (
     <>
-      <SiteHeader compact />
-      <main className="main-shell main-shell--article">
+      <SiteHeader />
+      <main className="main-shell">
         <article className="article">
           <h2 className="article__title">{post.title}</h2>
-          <p className="article__meta">
-            {post.date}
-            {post.readTime ? ` | ${post.readTime}` : ""}
-          </p>
+          <p className="article__meta">{getPostMeta(post)}</p>
           {post.content.map((paragraph) => (
             <p key={paragraph}>{paragraph}</p>
           ))}
           {post.resourceUrl ? (
             <p className="article__resource">
               <a href={post.resourceUrl} target="_blank" rel="noreferrer">
-                {post.resourceLabel ?? "Open attachment"}
+                {post.resourceLabel ?? "Anhang öffnen"}
               </a>
             </p>
           ) : null}
           <p>
-            <Link to="/">Back to all posts</Link>
+            <Link to="/">Zurück zu allen Beiträgen</Link>
           </p>
         </article>
       </main>

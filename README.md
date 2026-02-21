@@ -20,8 +20,11 @@ Minimal static blog homepage inspired by a clean, centered editorial layout.
 |-- src/
 |   |-- components/
 |   |   `-- SiteHeader.tsx
-|   |-- data/
-|   |   `-- posts.ts
+|   |-- content/
+|   |   `-- posts/
+|   |       |-- example.post.ts
+|   |       |-- redds-statuten.post.ts
+|   |       `-- index.ts
 |   |-- pages/
 |   |   |-- ArchivesPage.tsx
 |   |   |-- HomePage.tsx
@@ -77,6 +80,5 @@ Only use a repo base path (for example `/my-repo/`) if you deploy without a cust
 `HashRouter` avoids 404 refresh issues on GitHub Pages.
 
 ## Content
-All post content is local/static in `src/data/posts.ts`.
-
-The first post is `redds-statuten` and includes blog-style text plus a direct link to `Redds Statuten.pdf`.
+All posts are local/static and file-based in `src/content/posts/`.
+Add a new post by creating a new `*.post.ts` file in that folder.

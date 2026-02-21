@@ -4,13 +4,13 @@ import { SiteHeader } from "../components/SiteHeader";
 export function NotFoundPage() {
   return (
     <>
-      <SiteHeader compact />
-      <main className="main-shell main-shell--article">
+      <SiteHeader />
+      <main className="main-shell">
         <article className="article">
-          <h2>Page not found</h2>
-          <p>The requested page does not exist.</p>
+          <h2>Seite nicht gefunden</h2>
+          <p>Die angefragte Seite existiert nicht.</p>
           <p>
-            <Link to="/">Back to home</Link>
+            <Link to="/">Zur Startseite</Link>
           </p>
         </article>
       </main>
