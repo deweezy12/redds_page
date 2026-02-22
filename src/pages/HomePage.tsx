@@ -1,13 +1,13 @@
-import { PostList } from "../components/PostList";
-import { SiteHeader } from "../components/SiteHeader";
+import { Navigate } from "react-router-dom";
+import { posts } from "../content/posts";
 
 export function HomePage() {
-  return (
-    <>
-      <SiteHeader />
-      <main className="main-shell">
-        <PostList ariaLabel="Blogbeiträge" />
-      </main>
-    </>
-  );
+  const latestPost = posts[0];
+  const fallbackPath = "/archives";
+
+  if (!latestPost) {
+    return <Navigate to={fallbackPath} replace />;
+  }
+
+  return <Navigate to={`/posts/${latestPost.slug}`} replace />;
 }
