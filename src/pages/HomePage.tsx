@@ -196,22 +196,28 @@ export default function Home() {
           <h1
             className="font-bold text-white leading-none tracking-tight whitespace-nowrap"
             style={{
-              fontSize: "clamp(2.4rem, 7.5vw, 8.5rem)",
+              fontFamily: '"Poppins", "Inter", sans-serif',
+              fontSize: "clamp(2.5rem, 6.9vw, 6.8rem)",
+              fontWeight: 700,
+              lineHeight: 0.9,
               textShadow: "0 4px 80px rgba(0,0,0,0.35)",
               opacity: 1 - fadeOpacity * 1.4,
             }}
           >
-            Oliver Jan Jarosik
+            OLIVER JAN JAROSIK
           </h1>
           <p
-            className="mt-5 font-mono uppercase tracking-widest text-white/65"
+            className="mt-1 text-white"
             style={{
-              fontSize: "clamp(0.6rem, 1.3vw, 0.9rem)",
-              letterSpacing: "0.24em",
-              opacity: 1 - fadeOpacity * 1.6,
+              fontSize: "clamp(1.15rem, 2.3vw, 1.8rem)",
+              fontWeight: 700,
+              letterSpacing: "0.03em",
+              lineHeight: 1.25,
+              maxWidth: "28ch",
+              opacity: 1 - fadeOpacity * 1.55,
             }}
           >
-            Computer Vision Engineer &middot; AI Engineer
+            Computer Vision and AI Engineer
           </p>
         </div>
 
