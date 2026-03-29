@@ -183,6 +183,78 @@ function ProjectCard({ project }: { project: ProjectEntry }) {
   );
 }
 
+function ContactCard({
+  label,
+  title,
+  href,
+  children,
+}: {
+  label: string;
+  title: string;
+  href: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      className="contact-card block border border-white/8 rounded-3xl p-6 group"
+      style={{ background: "rgba(255,255,255,0.02)" }}
+      aria-label={`${title} external link`}
+    >
+      <div className="flex items-start justify-between gap-4 mb-4">
+        <div>
+          <p className="text-white/25 text-[11px] font-mono tracking-[0.28em] uppercase mb-2">{label}</p>
+          <h3 className="text-white text-xl font-semibold leading-tight">{title}</h3>
+        </div>
+        <span className="text-white/20 text-lg shrink-0 group-hover:text-white/60 transition-colors">↗</span>
+      </div>
+      {children}
+    </a>
+  );
+}
+
+function GitHubContributionCard() {
+  const username = "deweezy12";
+  const profileHref = `https://github.com/${username}`;
+  const [graphUnavailable, setGraphUnavailable] = useState(false);
+  const contributionSrc = `https://ghchart.rshah.org/39d353/${username}`;
+
+  return (
+    <ContactCard label="GitHub" title="@deweezy12" href={profileHref}>
+      <div className="flex items-center gap-4 mb-5">
+        <img
+          src={`${profileHref}.png?size=96`}
+          alt="GitHub avatar for deweezy12"
+          className="w-14 h-14 rounded-2xl object-cover border border-white/10"
+        />
+        <div>
+          <p className="text-white/55 text-sm leading-relaxed">
+            Open source profile, project history, and contribution activity.
+          </p>
+          <p className="text-white/30 text-xs font-mono tracking-wide mt-2">github.com/deweezy12</p>
+        </div>
+      </div>
+
+      <div className="contribution-panel rounded-2xl border border-white/8 overflow-hidden">
+        {graphUnavailable ? (
+          <div className="px-4 py-5 text-white/45 text-sm leading-relaxed">
+            Contribution graph unavailable right now. Open the GitHub profile to view the latest activity.
+          </div>
+        ) : (
+          <img
+            src={contributionSrc}
+            alt="GitHub contribution graph for deweezy12"
+            className="github-contributions block w-full"
+            onError={() => setGraphUnavailable(true)}
+          />
+        )}
+      </div>
+    </ContactCard>
+  );
+}
+
 function SideDots({ active, pastHero }: { active: string; pastHero: boolean }) {
   const scrollTo = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
@@ -309,6 +381,29 @@ export default function Home() {
         .card-hover:hover .card-logo {
           opacity: 0.12;
           filter: saturate(1.35) brightness(1.08);
+        }
+
+        .contact-card {
+          transition: background 0.25s, border-color 0.25s, transform 0.25s;
+        }
+
+        .contact-card:hover {
+          background: rgba(255,255,255,0.04) !important;
+          border-color: rgba(255,255,255,0.14) !important;
+          transform: translateY(-2px);
+        }
+
+        .contribution-panel {
+          background:
+            radial-gradient(circle at top left, rgba(255,255,255,0.05), transparent 38%),
+            linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+        }
+
+        .github-contributions {
+          min-height: 112px;
+          object-fit: cover;
+          mix-blend-mode: screen;
+          filter: brightness(0.9) contrast(1.05);
         }
 
         .pdf-preview {
@@ -662,6 +757,22 @@ export default function Home() {
                 </a>
               ))}
             </div>
+          </div>
+          <div className="grid lg:grid-cols-[minmax(0,1.25fr)_minmax(16rem,0.75fr)] gap-5 items-start mt-8">
+            <RevealBlock>
+              <GitHubContributionCard />
+            </RevealBlock>
+            <RevealBlock>
+              <ContactCard label="LinkedIn" title="Oliver Jan Jarosik" href="https://www.linkedin.com/in/oliver-jan-jarosik">
+                <p className="text-white/50 text-sm leading-relaxed mb-5">
+                  Professional background, current roles, and a direct channel for networking.
+                </p>
+                <div className="rounded-2xl border border-white/8 px-4 py-4 bg-white/[0.02]">
+                  <p className="text-white/30 text-[11px] font-mono tracking-[0.22em] uppercase mb-2">Profile</p>
+                  <p className="text-white/80 text-sm">linkedin.com/in/oliver-jan-jarosik</p>
+                </div>
+              </ContactCard>
+            </RevealBlock>
           </div>
         </RevealBlock>
       </section>
