@@ -57,12 +57,23 @@ npm run dev
 npm run build
 ```
 
+## Refresh GitHub Contributions
+The contact-section contribution calendar reads from `public/data/github-contributions.json`.
+
+To refresh that snapshot locally, provide a GitHub token with GraphQL access and run:
+
+```bash
+set GH_GRAPHQL_TOKEN=your_token_here
+npm run refresh:github-contributions
+```
+
 ## Deploy to GitHub Pages
 1. Push the repo to GitHub.
 2. Open `Settings -> Pages`.
 3. Set `Source` to `GitHub Actions`.
-4. Push to `main`.
-5. Workflow file `.github/workflows/deploy.yml` builds and deploys automatically.
+4. Add a repo secret named `GH_GRAPHQL_TOKEN`.
+5. Push to `main`.
+6. Workflow file `.github/workflows/deploy.yml` refreshes the contribution snapshot, builds, deploys automatically, and also runs daily.
 
 ## Base Path (Important)
 For the custom domain `https://theredds.eu`, keep Vite base as:
