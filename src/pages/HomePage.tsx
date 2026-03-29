@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 
-import { GitHubContributionCalendar, type GitHubContributionSnapshot } from "../components/GitHubContributionCalendar";
 import { StitchBackground } from "../components/StitchBackground";
 
 function useReveal() {
@@ -219,44 +218,8 @@ function ContactCard({
 function GitHubContributionCard() {
   const username = "deweezy12";
   const profileHref = `https://github.com/${username}`;
-  const [isLoading, setIsLoading] = useState(true);
-  const [snapshot, setSnapshot] = useState<GitHubContributionSnapshot | null>(null);
-  const [loadError, setLoadError] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    const loadContributions = async () => {
-      try {
-        const response = await fetch("/data/github-contributions.json", { cache: "no-store" });
-
-        if (!response.ok) {
-          throw new Error(`Contribution snapshot request failed: ${response.status}`);
-        }
-
-        const data = (await response.json()) as GitHubContributionSnapshot;
-
-        if (cancelled) return;
-
-        setSnapshot(data);
-        setLoadError(false);
-      } catch {
-        if (!cancelled) {
-          setLoadError(true);
-        }
-      } finally {
-        if (!cancelled) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    loadContributions();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [username]);
+  const [graphUnavailable, setGraphUnavailable] = useState(false);
+  const contributionSrc = `https://ghchart.rshah.org/39d353/${username}`;
 
   return (
     <ContactCard label="GitHub" title="@deweezy12" href={profileHref}>
@@ -268,29 +231,24 @@ function GitHubContributionCard() {
         />
         <div>
           <p className="text-white/55 text-sm leading-relaxed">
-            GitHub contribution activity rendered from a daily snapshot built from the GraphQL API.
+            Open source profile, project history, and contribution activity.
           </p>
           <p className="text-white/30 text-xs font-mono tracking-wide mt-2">github.com/deweezy12</p>
         </div>
       </div>
 
       <div className="contribution-panel rounded-2xl border border-white/8 overflow-hidden">
-        {loadError ? (
+        {graphUnavailable ? (
           <div className="px-4 py-5 text-white/45 text-sm leading-relaxed">
-            Contribution snapshot unavailable right now. Run `npm run refresh:github-contributions` with a GitHub token or let the deploy workflow refresh it.
-          </div>
-        ) : isLoading ? (
-          <div className="px-4 py-5 text-white/35 text-sm leading-relaxed">
-            Loading contribution activity...
-          </div>
-        ) : snapshot && snapshot.cells.length > 0 ? (
-          <div className="px-4 py-4">
-            <GitHubContributionCalendar data={snapshot} />
+            Contribution graph unavailable right now. Open the GitHub profile to view the latest activity.
           </div>
         ) : (
-          <div className="px-4 py-5 text-white/45 text-sm leading-relaxed">
-            No contribution snapshot has been generated yet. Once `GH_GRAPHQL_TOKEN` is configured, the workflow will refresh this automatically.
-          </div>
+          <img
+            src={contributionSrc}
+            alt="GitHub contribution graph for deweezy12"
+            className="github-contributions block w-full"
+            onError={() => setGraphUnavailable(true)}
+          />
         )}
       </div>
     </ContactCard>
@@ -439,6 +397,13 @@ export default function Home() {
           background:
             radial-gradient(circle at top left, rgba(255,255,255,0.05), transparent 38%),
             linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+        }
+
+        .github-contributions {
+          min-height: 112px;
+          object-fit: cover;
+          mix-blend-mode: screen;
+          filter: brightness(0.9) contrast(1.05);
         }
 
         .pdf-preview {
@@ -784,9 +749,10 @@ export default function Home() {
             </a>
             <div className="flex items-center gap-5">
               {[
+                { label: "GitHub", href: "https://github.com/deweezy12" },
                 { label: "LinkedIn", href: "https://www.linkedin.com/in/oliver-jan-jarosik" },
               ].map((l) => (
-                <a key={l.label} href={l.href} target="_blank" rel="noreferrer" className="text-white/35 text-sm hover:text-white/80 transition-colors font-mono tracking-wide">
+                <a key={l.label} href={l.href} className="text-white/35 text-sm hover:text-white/80 transition-colors font-mono tracking-wide">
                   {l.label}
                 </a>
               ))}
