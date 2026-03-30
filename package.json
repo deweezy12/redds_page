@@ -4,8 +4,9 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "typecheck": "tsc --noEmit",
+    "generate:github-snapshot": "node scripts/fetch-github-contributions.mjs",
+    "dev": "npm run generate:github-snapshot && vite",
+    "typecheck": "npm run generate:github-snapshot && tsc --noEmit",
     "build": "npm run typecheck && vite build",
     "preview": "vite preview"
   },

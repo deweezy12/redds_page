@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { StitchBackground } from "../components/StitchBackground";
+import { githubContributionSnapshot } from "../generated/githubContributionSnapshot";
 
 function useReveal() {
   const ref = useRef<HTMLDivElement>(null);
@@ -121,6 +122,161 @@ const PROJECTS: ProjectEntry[] = [
   },
 ];
 
+type GitHubContributionCell = {
+  date: string;
+  intensity: number;
+  color: string;
+};
+
+type GitHubContributionChart = {
+  weeks: Array<Array<GitHubContributionCell | null>>;
+  monthLabels: string[];
+  activeDays: number;
+  snapshotLabel: string;
+};
+
+const GITHUB_DARK_SCALE = ["#161b22", "#0e4429", "#006d32", "#26a641", "#39d353"] as const;
+const GITHUB_Y_AXIS_LABELS = ["", "Mon", "", "Wed", "", "Fri", ""] as const;
+
+function parseUtcDate(date: string) {
+  return new Date(`${date}T00:00:00Z`);
+}
+
+function formatChartMonth(date: string) {
+  return new Intl.DateTimeFormat("en-US", { month: "short", timeZone: "UTC" }).format(parseUtcDate(date));
+}
+
+function formatChartDate(date: string) {
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(parseUtcDate(date));
+}
+
+function formatSnapshotDate(date: string) {
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(date));
+}
+
+function getGitHubDarkColor(intensity: number) {
+  return GITHUB_DARK_SCALE[Math.min(Math.max(intensity, 0), GITHUB_DARK_SCALE.length - 1)];
+}
+
+function buildGitHubContributionChart() {
+  const cutoff = new Date(githubContributionSnapshot.fetchedAt);
+  cutoff.setUTCHours(0, 0, 0, 0);
+
+  const chartStart = new Date(cutoff);
+  chartStart.setUTCDate(chartStart.getUTCDate() - 364);
+  chartStart.setUTCDate(chartStart.getUTCDate() - chartStart.getUTCDay());
+
+  const dayLookup = new Map<string, { date: string; intensity: number; parsedDate: Date }>(
+    githubContributionSnapshot.payload.contributions
+      .filter((day) => Boolean(day.date))
+      .map((day) => {
+        const intensity = Number.parseInt(day.intensity, 10);
+        return [
+          day.date,
+          {
+            date: day.date,
+            intensity: Number.isNaN(intensity) ? 0 : intensity,
+            parsedDate: parseUtcDate(day.date),
+          },
+        ] as const;
+      })
+  );
+
+  const paddedDays: Array<GitHubContributionCell | null> = [];
+  const cursor = new Date(chartStart);
+
+  while (cursor.getTime() <= cutoff.getTime()) {
+    const isoDate = cursor.toISOString().slice(0, 10);
+    const day = dayLookup.get(isoDate);
+
+    paddedDays.push(
+      day
+        ? {
+            date: day.date,
+            intensity: day.intensity,
+            color: getGitHubDarkColor(day.intensity),
+          }
+        : {
+            date: isoDate,
+            intensity: 0,
+            color: getGitHubDarkColor(0),
+          }
+    );
+
+    cursor.setUTCDate(cursor.getUTCDate() + 1);
+  }
+
+  const visibleDays = paddedDays.filter((day): day is GitHubContributionCell => day !== null);
+
+  if (!visibleDays.length) {
+    return null;
+  }
+
+  const lastVisibleDate = parseUtcDate(visibleDays[visibleDays.length - 1].date);
+  const trailingPadding = 6 - lastVisibleDate.getUTCDay();
+
+  for (let index = 0; index < trailingPadding; index += 1) {
+    paddedDays.push(null);
+  }
+
+  const weeks = Array.from({ length: Math.ceil(paddedDays.length / 7) }, (_, index) => paddedDays.slice(index * 7, index * 7 + 7));
+  let lastLabeledMonth: number | null = null;
+  const monthLabels = weeks.map((week, index) => {
+    const firstRealCell = week.find((cell): cell is GitHubContributionCell => cell !== null);
+    if (!firstRealCell) return "";
+
+    const weekMonth = parseUtcDate(firstRealCell.date).getUTCMonth();
+    if (index === 0) {
+      lastLabeledMonth = weekMonth;
+      return formatChartMonth(firstRealCell.date);
+    }
+
+    const monthStart = week.find((cell) => cell && parseUtcDate(cell.date).getUTCDate() <= 7);
+    if (!monthStart) {
+      return "";
+    }
+
+    const monthStartMonth = parseUtcDate(monthStart.date).getUTCMonth();
+    if (monthStartMonth === lastLabeledMonth) {
+      return "";
+    }
+
+    lastLabeledMonth = monthStartMonth;
+    return formatChartMonth(monthStart.date);
+  });
+
+  return {
+    weeks,
+    monthLabels,
+    activeDays: visibleDays.filter((day) => day.intensity > 0).length,
+    snapshotLabel: formatSnapshotDate(githubContributionSnapshot.fetchedAt),
+  } satisfies GitHubContributionChart;
+}
+
+function formatContributionTooltip(cell: GitHubContributionCell) {
+  const levelLabels = [
+    "No visible activity",
+    "Low activity",
+    "Light activity",
+    "Medium activity",
+    "High activity",
+  ] as const;
+
+  return `${formatChartDate(cell.date)}: ${levelLabels[cell.intensity]}`;
+}
+
+const githubContributionChart = buildGitHubContributionChart();
+
 function PdfPreviewTile({ title, badge = "PDF" }: { title: string; badge?: string }) {
   return (
     <div className="pdf-preview shrink-0" aria-hidden="true">
@@ -215,11 +371,41 @@ function ContactCard({
   );
 }
 
+function ContactDetailRow({
+  href,
+  label,
+  icon,
+}: {
+  href?: string;
+  label: string;
+  icon?: React.ReactNode;
+}) {
+  const content = (
+    <div className="contact-detail-row">
+      <span className={`contact-detail-icon${icon ? "" : " contact-detail-icon-empty"}`} aria-hidden="true">
+        {icon}
+      </span>
+      <span className="contact-detail-text">{label}</span>
+    </div>
+  );
+
+  if (!href) {
+    return content;
+  }
+
+  return (
+    <a href={href} target="_blank" rel="noreferrer" className="contact-detail-link">
+      {content}
+    </a>
+  );
+}
+
 function GitHubContributionCard() {
-  const username = "deweezy12";
+  const username = githubContributionSnapshot.username;
   const profileHref = `https://github.com/${username}`;
-  const [graphUnavailable, setGraphUnavailable] = useState(false);
-  const contributionSrc = `https://ghchart.rshah.org/39d353/${username}`;
+  const activeDaysText = githubContributionChart
+    ? `${githubContributionChart.activeDays} active ${githubContributionChart.activeDays === 1 ? "day" : "days"}`
+    : null;
 
   return (
     <ContactCard label="GitHub" title="@deweezy12" href={profileHref}>
@@ -238,17 +424,62 @@ function GitHubContributionCard() {
       </div>
 
       <div className="contribution-panel rounded-2xl border border-white/8 overflow-hidden">
-        {graphUnavailable ? (
+        {githubContributionChart ? (
+          <div className="github-chart-frame">
+            <div className="github-chart-meta">
+              <p className="text-white/34 text-[11px] font-mono tracking-[0.18em] uppercase">Last Year</p>
+              <p className="text-white/28 text-[11px] font-mono tracking-wide">Updated {githubContributionChart.snapshotLabel}</p>
+            </div>
+
+            <div className="github-chart-shell">
+              <div className="github-chart-yaxis" aria-hidden="true">
+                {GITHUB_Y_AXIS_LABELS.map((label, index) => (
+                  <span key={`${label}-${index}`}>{label}</span>
+                ))}
+              </div>
+
+              <div className="github-chart-scroll">
+                <div className="github-chart-months" aria-hidden="true">
+                  {githubContributionChart.monthLabels.map((label, index) => (
+                    <span key={`${label || "blank"}-${index}`} className="github-chart-month">
+                      {label}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="github-chart-grid" role="img" aria-label={`GitHub contribution chart for ${username}`}>
+                  {githubContributionChart.weeks.map((week, weekIndex) => (
+                    <div key={`week-${weekIndex}`} className="github-chart-week">
+                      {week.map((cell, dayIndex) => (
+                        <span
+                          key={`cell-${weekIndex}-${dayIndex}`}
+                          className={`github-chart-cell${cell ? "" : " github-chart-cell-empty"}`}
+                          style={cell ? { backgroundColor: cell.color } : undefined}
+                          title={cell ? formatContributionTooltip(cell) : undefined}
+                          aria-hidden={cell ? undefined : true}
+                        />
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="github-chart-footer">
+              <p className="text-white/26 text-[11px] leading-relaxed">{activeDaysText} in the last 12 months.</p>
+              <div className="github-chart-legend" aria-hidden="true">
+                <span className="text-white/24 text-[11px]">Less</span>
+                {GITHUB_DARK_SCALE.map((color) => (
+                  <span key={color} className="github-chart-legend-cell" style={{ backgroundColor: color }} />
+                ))}
+                <span className="text-white/24 text-[11px]">More</span>
+              </div>
+            </div>
+          </div>
+        ) : (
           <div className="px-4 py-5 text-white/45 text-sm leading-relaxed">
             Contribution graph unavailable right now. Open the GitHub profile to view the latest activity.
           </div>
-        ) : (
-          <img
-            src={contributionSrc}
-            alt="GitHub contribution graph for deweezy12"
-            className="github-contributions block w-full"
-            onError={() => setGraphUnavailable(true)}
-          />
         )}
       </div>
     </ContactCard>
@@ -393,17 +624,202 @@ export default function Home() {
           transform: translateY(-2px);
         }
 
+        .contact-detail-link {
+          display: block;
+        }
+
+        .contact-detail-row {
+          display: flex;
+          align-items: center;
+          gap: 0.9rem;
+          padding: 1rem 0;
+          border-bottom: 1px solid rgba(255,255,255,0.08);
+          color: rgba(255,255,255,0.72);
+          transition: color 0.2s ease, border-color 0.2s ease;
+        }
+
+        .contact-detail-row:hover,
+        .contact-detail-link:hover .contact-detail-row {
+          color: rgba(255,255,255,0.96);
+          border-color: rgba(255,255,255,0.14);
+        }
+
+        .contact-detail-icon {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 1.35rem;
+          height: 1.35rem;
+          flex-shrink: 0;
+          color: rgba(255,255,255,0.48);
+          transition: color 0.2s ease;
+        }
+
+        .contact-detail-icon-empty {
+          opacity: 0;
+        }
+
+        .contact-detail-row:hover .contact-detail-icon,
+        .contact-detail-link:hover .contact-detail-icon {
+          color: #f7c4ff;
+        }
+
+        .contact-detail-text {
+          font-size: 1.08rem;
+          line-height: 1.5;
+        }
+
         .contribution-panel {
           background:
             radial-gradient(circle at top left, rgba(255,255,255,0.05), transparent 38%),
             linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
         }
 
-        .github-contributions {
-          min-height: 112px;
-          object-fit: cover;
-          mix-blend-mode: screen;
-          filter: brightness(0.9) contrast(1.05);
+        .github-chart-frame {
+          padding: 0.85rem 0.9rem 0.8rem;
+        }
+
+        .github-chart-meta {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 0.75rem;
+          margin-bottom: 0.55rem;
+        }
+
+        .github-chart-shell {
+          --gh-cell: 0.62rem;
+          --gh-gap: 0.18rem;
+          display: grid;
+          grid-template-columns: auto minmax(0, 1fr);
+          gap: 0.35rem;
+          align-items: start;
+        }
+
+        .github-chart-yaxis {
+          display: grid;
+          grid-template-rows: repeat(7, var(--gh-cell));
+          gap: var(--gh-gap);
+          padding-top: 0.95rem;
+          color: rgba(255,255,255,0.2);
+          font-size: 10px;
+          line-height: var(--gh-cell);
+          font-family: monospace;
+          letter-spacing: 0.02em;
+        }
+
+        .github-chart-scroll {
+          min-width: 0;
+          overflow-x: auto;
+          padding-bottom: 0.08rem;
+          scrollbar-width: thin;
+          scrollbar-color: rgba(255,255,255,0.18) rgba(255,255,255,0.05);
+        }
+
+        .github-chart-scroll::-webkit-scrollbar {
+          height: 8px;
+        }
+
+        .github-chart-scroll::-webkit-scrollbar-track {
+          background: rgba(255,255,255,0.05);
+          border-radius: 999px;
+        }
+
+        .github-chart-scroll::-webkit-scrollbar-thumb {
+          background: rgba(255,255,255,0.18);
+          border-radius: 999px;
+        }
+
+        .github-chart-scroll::-webkit-scrollbar-thumb:hover {
+          background: rgba(255,255,255,0.26);
+        }
+
+        .github-chart-months,
+        .github-chart-grid {
+          display: flex;
+          gap: var(--gh-gap, 0.18rem);
+          min-width: max-content;
+        }
+
+        .github-chart-months {
+          margin-bottom: var(--gh-gap, 0.18rem);
+        }
+
+        .github-chart-month {
+          width: var(--gh-cell, 0.62rem);
+          color: rgba(255,255,255,0.2);
+          font-size: 10px;
+          line-height: 1;
+          font-family: monospace;
+        }
+
+        .github-chart-week {
+          display: grid;
+          grid-template-rows: repeat(7, var(--gh-cell, 0.62rem));
+          gap: var(--gh-gap, 0.18rem);
+        }
+
+        .github-chart-cell {
+          width: var(--gh-cell, 0.62rem);
+          height: var(--gh-cell, 0.62rem);
+          border-radius: 2px;
+          box-shadow: inset 0 0 0 1px rgba(27,31,35,0.08);
+          background: #161b22;
+          transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease;
+        }
+
+        .github-chart-cell-empty {
+          background: transparent;
+          box-shadow: none;
+        }
+
+        .group:hover .github-chart-cell:not(.github-chart-cell-empty) {
+          box-shadow: inset 0 0 0 1px rgba(255,255,255,0.12);
+          filter: saturate(1.04);
+        }
+
+        .github-chart-cell:not(.github-chart-cell-empty):hover {
+          transform: scale(1.08);
+        }
+
+        .github-chart-footer {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 0.75rem;
+          margin-top: 0.55rem;
+        }
+
+        .github-chart-legend {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.22rem;
+        }
+
+        .github-chart-legend-cell {
+          width: var(--gh-cell, 0.62rem);
+          height: var(--gh-cell, 0.62rem);
+          border-radius: 2px;
+          box-shadow: inset 0 0 0 1px rgba(27,31,35,0.08);
+        }
+
+        @media (max-width: 640px) {
+          .github-chart-frame {
+            padding: 0.8rem;
+          }
+
+          .github-chart-meta,
+          .github-chart-footer {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.35rem;
+          }
+
+          .github-chart-yaxis {
+            --gh-cell: 0.56rem;
+            --gh-gap: 0.14rem;
+            padding-top: 0.9rem;
+          }
         }
 
         .pdf-preview {
@@ -735,15 +1151,15 @@ export default function Home() {
       <section id="contact" className="py-32 px-8 md:px-24 max-w-6xl mx-auto w-full">
         <RevealBlock>
           <SectionLabel n="05" label="Contact" />
-          <h2 className="font-bold text-white leading-tight mb-8" style={{ fontSize: "clamp(2.5rem, 6vw, 5.5rem)" }}>
+          <h2 className="text-4xl md:text-[3.9rem] font-bold text-white leading-tight mb-6">
             Let&apos;s work on
             <br />
             something useful.
           </h2>
-          <p className="text-white/45 text-lg max-w-lg leading-relaxed mb-10">
+          <p className="hidden text-white/45 text-lg max-w-lg leading-relaxed mb-10">
             Based in Berlin and open to computer vision, AI engineering, and applied machine learning opportunities. Reach out any time.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+          <div className="hidden flex-col sm:flex-row gap-4 items-start sm:items-center">
             <a href="mailto:O.jarosik@gmx.net" className="inline-flex items-center gap-2 bg-white text-black text-sm font-semibold px-6 py-3 rounded-full hover:bg-white/90 transition-colors">
               O.jarosik@gmx.net ↗
             </a>
@@ -758,20 +1174,50 @@ export default function Home() {
               ))}
             </div>
           </div>
-          <div className="grid lg:grid-cols-[minmax(0,1.25fr)_minmax(16rem,0.75fr)] gap-5 items-start mt-8">
+          <div className="max-w-2xl mb-10">
+            <ContactDetailRow
+              label="Based in Berlin"
+              icon={(
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 21s6-5.33 6-11a6 6 0 1 0-12 0c0 5.67 6 11 6 11Z" />
+                  <circle cx="12" cy="10" r="2.5" />
+                </svg>
+              )}
+            />
+            <ContactDetailRow
+              href="mailto:O.Jarosik@gmx.net"
+              label="O.Jarosik@gmx.net"
+              icon={(
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="5" width="18" height="14" rx="2" />
+                  <path d="M4 7l8 6 8-6" />
+                </svg>
+              )}
+            />
+            <ContactDetailRow
+              href="https://www.linkedin.com/in/oliver-jan-jarosik"
+              label="linkedin.com/in/oliver-jan-jarosik"
+              icon={(
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M6.94 8.5H3.56V20h3.38V8.5ZM5.25 3A2.02 2.02 0 0 0 3.2 5.02c0 1.11.9 2 2.02 2a2 2 0 1 0 .03-4.01ZM20.8 12.9c0-3.47-1.85-5.08-4.32-5.08-1.99 0-2.88 1.1-3.38 1.87V8.5H9.72c.04.79 0 11.5 0 11.5h3.38v-6.42c0-.34.02-.68.12-.93.27-.68.88-1.39 1.9-1.39 1.34 0 1.88 1.03 1.88 2.54V20H20.8v-7.1Z" />
+                </svg>
+              )}
+            />
+            <ContactDetailRow
+              href="https://www.instagram.com/reddsoligarch/"
+              label="@reddsoligarch"
+              icon={(
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="5" />
+                  <circle cx="12" cy="12" r="4" />
+                  <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+                </svg>
+              )}
+            />
+          </div>
+          <div className="mt-8 w-full max-w-[50rem]">
             <RevealBlock>
               <GitHubContributionCard />
-            </RevealBlock>
-            <RevealBlock>
-              <ContactCard label="LinkedIn" title="Oliver Jan Jarosik" href="https://www.linkedin.com/in/oliver-jan-jarosik">
-                <p className="text-white/50 text-sm leading-relaxed mb-5">
-                  Professional background, current roles, and a direct channel for networking.
-                </p>
-                <div className="rounded-2xl border border-white/8 px-4 py-4 bg-white/[0.02]">
-                  <p className="text-white/30 text-[11px] font-mono tracking-[0.22em] uppercase mb-2">Profile</p>
-                  <p className="text-white/80 text-sm">linkedin.com/in/oliver-jan-jarosik</p>
-                </div>
-              </ContactCard>
             </RevealBlock>
           </div>
         </RevealBlock>
