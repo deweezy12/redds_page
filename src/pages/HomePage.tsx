@@ -923,6 +923,23 @@ export default function Home() {
           .pdf-preview {
             margin-top: 0;
           }
+
+          .experience-card {
+            padding-right: 6.75rem;
+          }
+
+          .experience-card .card-logo {
+            top: 1.5rem !important;
+            right: 1.5rem !important;
+            bottom: auto !important;
+            left: auto !important;
+            width: 5.5rem !important;
+            max-width: 32% !important;
+            height: 2.25rem !important;
+            object-fit: contain;
+            object-position: right center;
+            opacity: 0.08 !important;
+          }
         }
       `}</style>
 
@@ -1122,7 +1139,7 @@ export default function Home() {
             },
           ].map((e, i) => (
             <RevealBlock key={i}>
-              <div className="card-hover relative overflow-hidden border border-white/8 rounded-2xl p-6 flex flex-col md:flex-row md:items-start gap-6" style={{ background: "rgba(255,255,255,0.02)" }}>
+              <div className="experience-card card-hover relative overflow-hidden border border-white/8 rounded-2xl p-6 flex flex-col md:flex-row md:items-start gap-6" style={{ background: "rgba(255,255,255,0.02)" }}>
                 {e.logo ? (
                   <img
                     src={e.logo}
@@ -1211,6 +1228,18 @@ export default function Home() {
                   <rect x="3" y="3" width="18" height="18" rx="5" />
                   <circle cx="12" cy="12" r="4" />
                   <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+                </svg>
+              )}
+            />
+            <ContactDetailRow
+              href="/pdf/Awesome_CV__1_%20(3).pdf"
+              label="Curriculum Vitae (PDF)"
+              icon={(
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7Z" />
+                  <path d="M14 2v5h5" />
+                  <path d="M9 13h6" />
+                  <path d="M9 17h6" />
                 </svg>
               )}
             />
