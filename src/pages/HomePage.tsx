@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Link } from "wouter";
 
 import { StitchBackground } from "../components/StitchBackground";
 import { githubContributionSnapshot } from "../generated/githubContributionSnapshot";
@@ -1254,7 +1255,17 @@ export default function Home() {
 
       <footer className="border-t border-white/6 px-8 md:px-24 py-8 max-w-6xl mx-auto w-full">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-white/20 text-xs font-mono">
-          <span>© {new Date().getFullYear()} Oliver Jan Jarosik</span>
+          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
+            <span>&copy; {new Date().getFullYear()} Oliver Jan Jarosik</span>
+            <span className="hidden sm:inline text-white/10">|</span>
+            <Link href="/impressum" className="transition-colors hover:text-white/75">
+              Impressum
+            </Link>
+            <span className="hidden sm:inline text-white/10">|</span>
+            <Link href="/datenschutz" className="transition-colors hover:text-white/75">
+              Datenschutz
+            </Link>
+          </div>
           <span>Computer Vision Engineer &amp; AI Engineer</span>
         </div>
       </footer>
