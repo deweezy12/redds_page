@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
 
 import { StitchBackground } from "../components/StitchBackground";
@@ -305,7 +305,7 @@ function PdfPreviewTile({ title, badge = "PDF" }: { title: string; badge?: strin
 
 function SplatPreviewPanel({ href, title }: { href: string; title: string }) {
   return (
-    <div className="relative mt-1 aspect-[4/3] w-full overflow-hidden rounded-2xl border border-white/10 bg-black/60 md:mt-0 md:w-[18rem] lg:w-[20rem]">
+    <div className="card-hover relative aspect-[4/3] min-h-[15rem] w-full overflow-hidden rounded-2xl border border-white/8 bg-black/60">
       <iframe
         title={`${title} preview`}
         src={buildSuperSplatUrl(CAREER_SPLAT_URL)}
@@ -328,7 +328,6 @@ function SplatPreviewPanel({ href, title }: { href: string; title: string }) {
 
 function ProjectCard({ project }: { project: ProjectEntry }) {
   const isExternal = Boolean(project.href?.startsWith("http"));
-  const hasTryLink = Boolean(project.tryHref);
   const content = (
     <div className="flex flex-col md:flex-row md:items-start gap-5 md:gap-6">
       <div className="flex items-start gap-4 md:block md:w-24 shrink-0">
@@ -341,30 +340,7 @@ function ProjectCard({ project }: { project: ProjectEntry }) {
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-4">
           <h3 className="text-white text-lg font-semibold leading-snug">{project.title}</h3>
-          {hasTryLink ? (
-            <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
-              {project.href ? (
-                <a
-                  href={project.href}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="rounded-full border border-white/10 px-3 py-1 text-[11px] font-mono uppercase tracking-[0.18em] text-white/45 transition-colors hover:border-white/24 hover:text-white/80"
-                  aria-label={`${project.title}${isExternal ? " external link" : " PDF"}`}
-                >
-                  PDF
-                </a>
-              ) : null}
-              <Link
-                href={project.tryHref ?? "#"}
-                className="rounded-full bg-white px-3 py-1 text-[11px] font-mono font-semibold uppercase tracking-[0.18em] text-black transition-colors hover:bg-white/86"
-                aria-label={`Try ${project.title} Gaussian Splat viewer`}
-              >
-                Try me
-              </Link>
-            </div>
-          ) : (
-            <span className="text-white/20 text-lg shrink-0 group-hover:text-white/60 transition-colors">↗</span>
-          )}
+          <span className="text-white/20 text-lg shrink-0 group-hover:text-white/60 transition-colors">↗</span>
         </div>
         <p className="text-white/30 text-xs font-mono tracking-wider mt-1 mb-3">{project.venue}</p>
         <p className="text-white/45 text-sm leading-relaxed mb-4">{project.desc}</p>
@@ -372,17 +348,8 @@ function ProjectCard({ project }: { project: ProjectEntry }) {
           {project.tags.map((tag) => <span key={tag} className="pill-tag">{tag}</span>)}
         </div>
       </div>
-      {project.tryHref ? <SplatPreviewPanel href={project.tryHref} title={project.title} /> : null}
     </div>
   );
-
-  if (hasTryLink) {
-    return (
-      <div className="card-hover border border-white/8 rounded-2xl p-7 group" style={{ background: "rgba(255,255,255,0.02)" }}>
-        {content}
-      </div>
-    );
-  }
 
   if (project.href) {
     return (
@@ -1107,16 +1074,23 @@ export default function Home() {
         </RevealBlock>
       </section>
 
-      <section id="research" className="py-32 px-8 md:px-24 max-w-6xl mx-auto w-full">
+      <section id="research" className="py-32 px-8 md:px-24 max-w-7xl mx-auto w-full">
         <RevealBlock>
           <SectionLabel n="02" label="Projects" />
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-14">Selected Work</h2>
         </RevealBlock>
-        <div className="space-y-4">
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_20rem] xl:items-start">
           {PROJECTS.map((project, i) => (
-            <RevealBlock key={i}>
-              <ProjectCard project={project} />
-            </RevealBlock>
+            <Fragment key={i}>
+              <RevealBlock className="xl:col-start-1">
+                <ProjectCard project={project} />
+              </RevealBlock>
+              {project.tryHref ? (
+                <RevealBlock className="xl:col-start-2 xl:row-start-3">
+                  <SplatPreviewPanel href={project.tryHref} title={project.title} />
+                </RevealBlock>
+              ) : null}
+            </Fragment>
           ))}
         </div>
       </section>
