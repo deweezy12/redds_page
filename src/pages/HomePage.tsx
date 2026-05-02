@@ -53,6 +53,14 @@ const SECTIONS = [
 ];
 
 const INTRO_TAGS = ["Python", "C++", "GitHub", "OpenCV", "Azure", "AWS"] as const;
+const SUPER_SPLAT_BASE_URL = "https://superspl.at/editor";
+const CAREER_SPLAT_URL = "https://theredds.eu/splats/resized.ply";
+
+function buildSuperSplatUrl(splatUrl: string) {
+  const params = new URLSearchParams({ load: splatUrl });
+
+  return `${SUPER_SPLAT_BASE_URL}?${params.toString()}`;
+}
 
 type ProjectEntry = {
   year: string;
@@ -295,6 +303,29 @@ function PdfPreviewTile({ title, badge = "PDF" }: { title: string; badge?: strin
   );
 }
 
+function SplatPreviewPanel({ href, title }: { href: string; title: string }) {
+  return (
+    <div className="relative mt-1 aspect-[4/3] w-full overflow-hidden rounded-2xl border border-white/10 bg-black/60 md:mt-0 md:w-[18rem] lg:w-[20rem]">
+      <iframe
+        title={`${title} preview`}
+        src={buildSuperSplatUrl(CAREER_SPLAT_URL)}
+        className="h-full w-full border-0"
+        allow="fullscreen; xr-spatial-tracking"
+        tabIndex={-1}
+      />
+      <Link
+        href={href}
+        className="absolute inset-0 z-10 flex items-end justify-end bg-black/0 p-3 transition-colors hover:bg-black/16"
+        aria-label={`Open ${title} Gaussian Splat viewer`}
+      >
+        <span className="rounded-full bg-white px-3 py-1 text-[11px] font-mono font-semibold uppercase tracking-[0.18em] text-black shadow-[0_10px_24px_rgba(0,0,0,0.35)]">
+          Open
+        </span>
+      </Link>
+    </div>
+  );
+}
+
 function ProjectCard({ project }: { project: ProjectEntry }) {
   const isExternal = Boolean(project.href?.startsWith("http"));
   const hasTryLink = Boolean(project.tryHref);
@@ -341,6 +372,7 @@ function ProjectCard({ project }: { project: ProjectEntry }) {
           {project.tags.map((tag) => <span key={tag} className="pill-tag">{tag}</span>)}
         </div>
       </div>
+      {project.tryHref ? <SplatPreviewPanel href={project.tryHref} title={project.title} /> : null}
     </div>
   );
 
