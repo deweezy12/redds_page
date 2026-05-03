@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, lazy, Suspense, useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
 
 import { StitchBackground } from "../components/StitchBackground";
@@ -53,14 +53,10 @@ const SECTIONS = [
 ];
 
 const INTRO_TAGS = ["Python", "C++", "GitHub", "OpenCV", "Azure", "AWS"] as const;
-const SUPER_SPLAT_BASE_URL = "https://superspl.at/editor";
-const CAREER_SPLAT_URL = "https://theredds.eu/splats/resized.ply";
-
-function buildSuperSplatUrl(splatUrl: string) {
-  const params = new URLSearchParams({ load: splatUrl });
-
-  return `${SUPER_SPLAT_BASE_URL}?${params.toString()}`;
-}
+const CAREER_SPLAT_URL = "/splats/resized.ply";
+const GaussianSplatTile = lazy(() =>
+  import("../components/GaussianSplatTile").then((module) => ({ default: module.GaussianSplatTile }))
+);
 
 type ProjectEntry = {
   year: string;
@@ -303,25 +299,12 @@ function PdfPreviewTile({ title, badge = "PDF" }: { title: string; badge?: strin
   );
 }
 
-function SplatPreviewPanel({ href, title }: { href: string; title: string }) {
+function SplatPreviewPanel({ title }: { title: string }) {
   return (
     <div className="card-hover relative aspect-[4/3] min-h-[15rem] w-full overflow-hidden rounded-2xl border border-white/8 bg-black/60">
-      <iframe
-        title={`${title} preview`}
-        src={buildSuperSplatUrl(CAREER_SPLAT_URL)}
-        className="h-full w-full border-0"
-        allow="fullscreen; xr-spatial-tracking"
-        tabIndex={-1}
-      />
-      <Link
-        href={href}
-        className="absolute inset-0 z-10 flex items-end justify-end bg-black/0 p-3 transition-colors hover:bg-black/16"
-        aria-label={`Open ${title} Gaussian Splat viewer`}
-      >
-        <span className="rounded-full bg-white px-3 py-1 text-[11px] font-mono font-semibold uppercase tracking-[0.18em] text-black shadow-[0_10px_24px_rgba(0,0,0,0.35)]">
-          Open
-        </span>
-      </Link>
+      <Suspense fallback={null}>
+        <GaussianSplatTile url={CAREER_SPLAT_URL} title={`${title} Gaussian splat preview`} />
+      </Suspense>
     </div>
   );
 }
@@ -1087,7 +1070,7 @@ export default function Home() {
               </RevealBlock>
               {project.tryHref ? (
                 <RevealBlock className="xl:col-start-2 xl:row-start-3">
-                  <SplatPreviewPanel href={project.tryHref} title={project.title} />
+                  <SplatPreviewPanel title={project.title} />
                 </RevealBlock>
               ) : null}
             </Fragment>
