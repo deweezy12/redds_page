@@ -57,6 +57,9 @@ const CAREER_SPLAT_URL = "/splats/resized.ply";
 const GaussianSplatTile = lazy(() =>
   import("../components/GaussianSplatTile").then((module) => ({ default: module.GaussianSplatTile }))
 );
+const ChatbotTile = lazy(() =>
+  import("../components/ChatbotTile").then((module) => ({ default: module.ChatbotTile }))
+);
 
 type ProjectEntry = {
   year: string;
@@ -68,6 +71,7 @@ type ProjectEntry = {
   href?: string;
   previewBadge?: string;
   tryHref?: string;
+  tryChatbot?: boolean;
 };
 
 const PROJECTS: ProjectEntry[] = [
@@ -86,6 +90,7 @@ const PROJECTS: ProjectEntry[] = [
     venue: "Software Engineering Project",
     tags: ["Python", "OpenAI Agents SDK", "Snowflake", "Azure Cognitive Search", "AWS EC2"],
     desc: "Built a modular Microsoft Teams chatbot with function calling, Snowflake query pipelines, Azure vector search-based RAG, Dockerized deployment, and automated Excel reporting for internal workflows.",
+    tryChatbot: true,
   },
   {
     year: "2025",
@@ -304,6 +309,16 @@ function SplatPreviewPanel({ title }: { title: string }) {
     <div className="card-hover relative aspect-[4/3] min-h-[15rem] w-full overflow-hidden rounded-2xl border border-white/8 bg-black/60">
       <Suspense fallback={null}>
         <GaussianSplatTile url={CAREER_SPLAT_URL} title={`${title} Gaussian splat preview`} />
+      </Suspense>
+    </div>
+  );
+}
+
+function ChatbotPreviewPanel({ title }: { title: string }) {
+  return (
+    <div className="card-hover relative aspect-[4/3] min-h-[15rem] w-full overflow-hidden rounded-2xl border border-white/8 bg-black/60">
+      <Suspense fallback={null}>
+        <ChatbotTile title={`${title} chatbot preview`} />
       </Suspense>
     </div>
   );
@@ -1068,8 +1083,13 @@ export default function Home() {
               <RevealBlock className="xl:col-start-1">
                 <ProjectCard project={project} />
               </RevealBlock>
+              {project.tryChatbot ? (
+                <RevealBlock className="hidden xl:block xl:col-start-2">
+                  <ChatbotPreviewPanel title={project.title} />
+                </RevealBlock>
+              ) : null}
               {project.tryHref ? (
-                <RevealBlock className="xl:col-start-2 xl:row-start-3">
+                <RevealBlock className="hidden xl:block xl:col-start-2">
                   <SplatPreviewPanel title={project.title} />
                 </RevealBlock>
               ) : null}
