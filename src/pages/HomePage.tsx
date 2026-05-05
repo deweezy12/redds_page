@@ -57,9 +57,6 @@ const CAREER_SPLAT_URL = "/splats/resized.ply";
 const GaussianSplatTile = lazy(() =>
   import("../components/GaussianSplatTile").then((module) => ({ default: module.GaussianSplatTile }))
 );
-const ChatbotTile = lazy(() =>
-  import("../components/ChatbotTile").then((module) => ({ default: module.ChatbotTile }))
-);
 
 type ProjectEntry = {
   year: string;
@@ -314,7 +311,8 @@ function SplatPreviewPanel({ title }: { title: string }) {
   );
 }
 
-function ChatbotPreviewPanel({ title }: { title: string }) {
+// Temporarily disabled to test scroll issue
+/* function ChatbotPreviewPanel({ title }: { title: string }) {
   return (
     <div className="card-hover relative aspect-[4/3] min-h-[15rem] w-full overflow-hidden rounded-2xl border border-white/8 bg-black/60">
       <Suspense fallback={null}>
@@ -322,7 +320,7 @@ function ChatbotPreviewPanel({ title }: { title: string }) {
       </Suspense>
     </div>
   );
-}
+} */
 
 function ProjectCard({ project }: { project: ProjectEntry }) {
   const isExternal = Boolean(project.href?.startsWith("http"));
@@ -593,15 +591,6 @@ export default function Home() {
 
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  // Force scroll to top on initial page load (desktop fix)
-  useEffect(() => {
-    window.scrollTo(0, 0);
-    
-    if ('scrollRestoration' in window.history) {
-      window.history.scrollRestoration = 'manual';
-    }
   }, []);
 
   const heroH = typeof window !== "undefined" ? window.innerHeight : 800;
@@ -1092,11 +1081,12 @@ export default function Home() {
               <RevealBlock className="xl:col-start-1">
                 <ProjectCard project={project} />
               </RevealBlock>
-              {project.tryChatbot ? (
+              {/* Temporarily disabled to test scroll issue */}
+              {/* {project.tryChatbot ? (
                 <RevealBlock className="hidden xl:block xl:col-start-2">
                   <ChatbotPreviewPanel title={project.title} />
                 </RevealBlock>
-              ) : null}
+              ) : null} */}
               {project.tryHref ? (
                 <RevealBlock className="hidden xl:block xl:col-start-2">
                   <SplatPreviewPanel title={project.title} />
