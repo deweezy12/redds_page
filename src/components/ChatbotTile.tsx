@@ -6,55 +6,157 @@ type Message = {
   timestamp: Date;
 };
 
+type ChatResponse = {
+  reply?: string;
+  error?: string;
+};
+
 type ChatbotTileProps = {
   title: string;
 };
+
+const apiUrl = (import.meta.env.VITE_MIA_CHAT_API_URL ?? "").trim();
+const isConfigured = apiUrl.length > 0;
+
+const starterMessage = 
+  "Wait... you actually found the greatest website ever made? I'm honored to be here. What brings you to this corner of excellence?";
+
+function buildHistory(messages: Message[]): Array<[string, string]> {
+  const history: Array<[string, string]> = [];
+  let pendingUserMessage: string | null = null;
+
+  // Skip the first message (starter message)
+  for (const message of messages.slice(1)) {
+    if (message.role === "user") {
+      if (pendingUserMessage) {
+        history.push([pendingUserMessage, ""]);
+      }
+      pendingUserMessage = message.content;
+      continue;
+    }
+
+    if (pendingUserMessage) {
+      history.push([pendingUserMessage, message.content]);
+      pendingUserMessage = null;
+    }
+  }
+
+  if (pendingUserMessage) {
+    history.push([pendingUserMessage, ""]);
+  }
+
+  return history;
+}
 
 export function ChatbotTile({ title }: ChatbotTileProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "system",
-      content: "Hello! I'm the Media Impact Assistant. Ask me anything.",
+      content: starterMessage,
       timestamp: new Date(),
     },
   ]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Fixed scroll function - only scrolls within container, not the entire page
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    const container = messagesContainerRef.current;
+    if (container) {
+      container.scrollTop = container.scrollHeight;
+    }
   };
 
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || isTyping) return;
+    const message = input.trim();
+    
+    if (!message || isTyping) return;
 
-    // Add user message
+    // Build history and add user message
+    const history = buildHistory(messages);
     const userMessage: Message = {
       role: "user",
-      content: input.trim(),
+      content: message,
       timestamp: new Date(),
     };
+    
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
+
+    // Check if API is configured
+    if (!isConfigured) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: "The chat backend isn't configured yet. Set VITE_MIA_CHAT_API_URL to connect to the API.",
+          timestamp: new Date(),
+        },
+      ]);
+      return;
+    }
+
     setIsTyping(true);
 
-    // Simulate assistant response (echo) with realistic delay
-    setTimeout(() => {
-      const assistantMessage: Message = {
-        role: "assistant",
-        content: input.trim(),
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, assistantMessage]);
+    try {
+      // Send request to backend
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ message, history }),
+      });
+
+      // Parse and validate response
+      const contentType = response.headers.get("content-type") ?? "";
+      const raw = await response.text();
+
+      if (!contentType.includes("application/json")) {
+        throw new Error(`Server returned non-JSON response (Status ${response.status}).`);
+      }
+
+      let data: ChatResponse;
+      try {
+        data = JSON.parse(raw) as ChatResponse;
+      } catch {
+        throw new Error("Invalid JSON response from server.");
+      }
+
+      if (!response.ok) {
+        throw new Error(data.error || "Unknown error");
+      }
+
+      // Add assistant reply
+      const reply = String(data.reply ?? "").trim() || "No response received.";
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: reply,
+          timestamp: new Date(),
+        },
+      ]);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: `Request failed: ${errorMessage}`,
+          timestamp: new Date(),
+        },
+      ]);
+    } finally {
       setIsTyping(false);
-    }, 500 + Math.random() * 500); // 500-1000ms delay
+    }
   };
 
   const getRoleColor = (role: Message["role"]) => {
@@ -99,7 +201,10 @@ export function ChatbotTile({ title }: ChatbotTileProps) {
       </div>
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
+      <div 
+        ref={messagesContainerRef}
+        className="flex-1 overflow-y-auto px-4 py-3 space-y-2 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent"
+      >
         {messages.map((message, index) => (
           <div
             key={`${message.timestamp.getTime()}-${index}`}
@@ -115,7 +220,6 @@ export function ChatbotTile({ title }: ChatbotTileProps) {
             <span className="animate-pulse">typing...</span>
           </div>
         )}
-        <div ref={messagesEndRef} />
       </div>
 
       {/* Input Area */}
