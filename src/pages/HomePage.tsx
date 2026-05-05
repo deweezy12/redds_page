@@ -595,6 +595,15 @@ export default function Home() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Force scroll to top on initial page load (desktop fix)
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+  }, []);
+
   const heroH = typeof window !== "undefined" ? window.innerHeight : 800;
   const parallaxY = scrollY * 0.45;
   const start = heroH * 0.15;
