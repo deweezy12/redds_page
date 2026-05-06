@@ -33,6 +33,8 @@ jobs:
         run: npm install
 
       - name: Build site
+        env:
+          VITE_MIA_CHAT_API_URL: ${{ secrets.VITE_MIA_CHAT_API_URL }}
         run: npm run build
 
       - name: Setup Pages
