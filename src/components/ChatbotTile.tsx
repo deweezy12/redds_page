@@ -19,7 +19,7 @@ const apiUrl = (import.meta.env.VITE_MIA_CHAT_API_URL ?? "").trim();
 const isConfigured = apiUrl.length > 0;
 
 const starterMessage = 
-  "Wait... you actually found the greatest website ever made? I'm honored to be here. What brings you to this corner of excellence?";
+  "Hello World. I'm Oliver's private assistant, ask me anything.";
 
 function buildHistory(messages: Message[]): Array<[string, string]> {
   const history: Array<[string, string]> = [];
