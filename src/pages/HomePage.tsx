@@ -78,18 +78,18 @@ const PROJECTS: ProjectEntry[] = [
   {
     year: "2026",
     subYear: "- now",
-    title: "Learning-Based Optimization for 3D Surgical Visualization",
+    title: "Learning-Based Colormap Optimization for 3D Surgical Visualization in Minimally Invasive Heart Valve Procedures",
     venue: "Master Thesis",
     tags: ["Medical Visualization", "Optimization", "3D Vision"],
-    desc: "Working with endoscopic images and 3D visualization in close exchange with doctors to improve surgical visualization workflows.",
+    desc: "Building a real-time 3D visualization workflow from stereo endoscopic heart valve images, combining them with preoperative 3D ultrasound data to improve 2D-to-3D surgical representation.",
   },
   {
     year: "2025",
     subYear: "- now",
-    title: "Media Impact Assistant Chatbot",
+    title: "Media Impact Assistant",
     venue: "Software Engineering Project",
     tags: ["Python", "OpenAI Agents SDK", "Snowflake", "Azure Cognitive Search", "AWS EC2"],
-    desc: "Built a modular Microsoft Teams chatbot with function calling, Snowflake query pipelines, Azure vector search-based RAG, Dockerized deployment, and automated Excel reporting for internal workflows.",
+    desc: "Built an internal Microsoft Teams infrastructure with frontend and backend services. It started as a chatbot assistant for general-purpose questions using Snowflake query pipelines and search-based RAG vector stores, then grew into a broader web app that supports internal employee workflows beyond chat.",
     tryChatbot: true,
   },
   {
@@ -1106,7 +1106,7 @@ export default function Home() {
         <div className="grid md:grid-cols-2 gap-5">
           {[
             {
-              quote: "Master of Science in Computer Science at TU Berlin, expected October 2026. Thesis in progress: Learning-Based Optimization for 3D Surgical Visualization in Minimally Invasive Heart Valve Procedures.",
+              quote: "Master of Science in Computer Science at TU Berlin, expected October 2026. Thesis in progress: Learning-Based Colormap Optimization for 3D Surgical Visualization in Minimally Invasive Heart Valve Procedures.",
               name: "Technische Universität Berlin",
               role: "Oct 2023 - Oct 2026 (expected)",
               logo: "/assets/tu-berlin-logo.svg",
@@ -1168,7 +1168,7 @@ export default function Home() {
               subPeriod: "- Now",
               role: "AI Engineer",
               org: "Media Impact GmbH & Co. KG",
-              desc: "Developing AI-supported internal tools, including a Microsoft Teams chatbot with RAG, vector databases, API integrations, debugging, and performance optimization.",
+              desc: "Developing AI-supported internal tools, including Microsoft Teams assistant infrastructure, RAG, vector databases, API integrations, web app workflows, debugging, and performance optimization.",
               logo: "/assets/MI_Logo_Pink_weiss.svg",
               logoClassName: "absolute right-[-13%] top-[15%] w-[64%] max-w-none opacity-[0.045] pointer-events-none select-none",
             },
