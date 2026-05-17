@@ -80,7 +80,7 @@ const PROJECTS: ProjectEntry[] = [
     subYear: "- now",
     title: "Learning-Based Colormap Optimization for 3D Surgical Visualization in Minimally Invasive Heart Valve Procedures",
     venue: "Master Thesis",
-    tags: ["Medical Visualization", "Optimization", "3D Vision"],
+    tags: ["Genetic Algorithm", "Encoder Decoder", "3D Reconstruction", "Medical Images"],
     desc: "Building a real-time 3D visualization workflow from stereo endoscopic heart valve images, combining them with preoperative 3D ultrasound data to improve 2D-to-3D surgical representation.",
   },
   {
