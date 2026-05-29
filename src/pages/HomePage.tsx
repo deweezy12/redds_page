@@ -54,11 +54,16 @@ const SECTIONS = [
 
 const INTRO_TAGS = ["Python", "C++", "GitHub", "OpenCV", "Azure", "AWS"] as const;
 const CAREER_SPLAT_URL = "/splats/resized.ply";
+const F1_TRAJECTORY_VIDEO_URL = "/assets/trajectory_homography_clip.mp4";
+const F1_TRAJECTORY_POSTER_URL = "/assets/trajectory_homography_clip-poster.jpg";
 const GaussianSplatTile = lazy(() =>
   import("../components/GaussianSplatTile").then((module) => ({ default: module.GaussianSplatTile }))
 );
 const ChatbotTile = lazy(() =>
   import("../components/ChatbotTile").then((module) => ({ default: module.ChatbotTile }))
+);
+const VideoTile = lazy(() =>
+  import("../components/VideoTile").then((module) => ({ default: module.VideoTile }))
 );
 
 type ProjectEntry = {
@@ -72,6 +77,7 @@ type ProjectEntry = {
   previewBadge?: string;
   tryHref?: string;
   tryChatbot?: boolean;
+  tryVideo?: boolean;
 };
 
 const PROJECTS: ProjectEntry[] = [
@@ -111,6 +117,7 @@ const PROJECTS: ProjectEntry[] = [
     tags: ["YOLO", "Homography", "PnP", "OpenCV"],
     desc: "Built a trajectory tracking project focused on following Formula 1 motion patterns and turning them into clear, usable visualizations.",
     href: "https://github.com/deweezy12/f1-trajectory-tracker",
+    tryVideo: true,
   },
   {
     year: "2024",
@@ -319,6 +326,20 @@ function ChatbotPreviewPanel({ title }: { title: string }) {
     <div className="card-hover relative aspect-[4/3] min-h-[15rem] w-full overflow-hidden rounded-2xl border border-white/8 bg-black/60">
       <Suspense fallback={null}>
         <ChatbotTile title={`${title} chatbot preview`} />
+      </Suspense>
+    </div>
+  );
+}
+
+function VideoPreviewPanel({ title }: { title: string }) {
+  return (
+    <div className="card-hover relative aspect-[4/3] min-h-[15rem] w-full overflow-hidden rounded-2xl border border-white/8 bg-black/60">
+      <Suspense fallback={null}>
+        <VideoTile
+          src={F1_TRAJECTORY_VIDEO_URL}
+          poster={F1_TRAJECTORY_POSTER_URL}
+          title={`${title} video preview`}
+        />
       </Suspense>
     </div>
   );
@@ -1091,6 +1112,11 @@ export default function Home() {
               {project.tryHref ? (
                 <RevealBlock className="hidden xl:block xl:col-start-2">
                   <SplatPreviewPanel title={project.title} />
+                </RevealBlock>
+              ) : null}
+              {project.tryVideo ? (
+                <RevealBlock className="hidden xl:block xl:col-start-2">
+                  <VideoPreviewPanel title={project.title} />
                 </RevealBlock>
               ) : null}
             </Fragment>
