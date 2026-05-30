@@ -115,7 +115,7 @@ const PROJECTS: ProjectEntry[] = [
     title: "F1 Trajectory Tracker",
     venue: "Computer Vision Project",
     tags: ["YOLOv11", "Roboflow", "ByteTrack", "Homography", "OpenCV"],
-    desc: "Fine-tuned YOLOv11 on a Roboflow F1 car dataset, then combined ByteTrack with frame-to-frame homography estimation to compensate camera motion and keep trajectory overlays aligned with the track.",
+    desc: "Reconstructed a Formula 1 broadcast overlay that visualizes vehicle trajectories in real time. Fine-tuned YOLOv11 on a Roboflow F1 car dataset and combined ByteTrack with frame-to-frame homography estimation to compensate for camera motion, keeping trajectory overlays accurately aligned with the track.",
     href: "https://github.com/deweezy12/f1-trajectory-tracker",
     tryVideo: true,
   },
