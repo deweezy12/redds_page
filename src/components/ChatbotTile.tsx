@@ -58,6 +58,7 @@ export function ChatbotTile({ title }: ChatbotTileProps) {
   ]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [isFirstReplyPending, setIsFirstReplyPending] = useState(false);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -103,6 +104,7 @@ export function ChatbotTile({ title }: ChatbotTileProps) {
       return;
     }
 
+    setIsFirstReplyPending(history.length === 0);
     setIsTyping(true);
 
     try {
@@ -156,6 +158,7 @@ export function ChatbotTile({ title }: ChatbotTileProps) {
       ]);
     } finally {
       setIsTyping(false);
+      setIsFirstReplyPending(false);
     }
   };
 
@@ -217,7 +220,19 @@ export function ChatbotTile({ title }: ChatbotTileProps) {
         {isTyping && (
           <div className="text-cyan-400/60 leading-relaxed">
             <span className="text-white/30">{"< "}</span>
-            <span className="animate-pulse">typing...</span>
+            {isFirstReplyPending ? (
+              <span>
+                Mein Bot reibt sich noch den Schlaf aus
+                <span className="inline-flex w-6 justify-start" aria-hidden="true">
+                  <span className="animate-pulse">...</span>
+                </span>
+                <span className="block mt-1 text-white/40">
+                  Die erste Antwort dauert ein paar Sekunden, weil ich einen kostenlosen Hoster nutze. Bin gespannt, was du von meinem Bot hältst!
+                </span>
+              </span>
+            ) : (
+              <span className="animate-pulse">typing...</span>
+            )}
           </div>
         )}
       </div>
