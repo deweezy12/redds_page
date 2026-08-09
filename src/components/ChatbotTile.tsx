@@ -222,7 +222,6 @@ export function ChatbotTile({ title }: ChatbotTileProps) {
             <span className="text-white/30">{"< "}</span>
             {isFirstReplyPending ? (
               <span>
-                Mein Bot reibt sich noch den Schlaf aus
                 <span className="inline-flex w-6 justify-start" aria-hidden="true">
                   <span className="animate-pulse">...</span>
                 </span>
