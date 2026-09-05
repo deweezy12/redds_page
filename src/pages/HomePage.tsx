@@ -105,7 +105,7 @@ const PROJECTS: ProjectEntry[] = [
     venue: "CAREER Research Project",
     tags: ["vMamba", "3D Gaussian Splatting", "6DoF Pose Estimation", "Stereo Vision", "RANSAC"],
     desc: "Developed a real-time 6DoF pose estimation pipeline for docking interfaces from synchronized stereo imagery, combining synthetic-to-real training, VMamba-based keypoint detection, and robust PnP/RANSAC pose recovery.",
-    href: "/pdf/CAREER_Paper___Relative_Pose_Estimation.pdf",
+    href: "/pdf/RPoseSmallsats.pdf",
     previewBadge: "PDF",
     tryHref: "/career-splat",
   },
